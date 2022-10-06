@@ -65,6 +65,9 @@ summary(pfit)
 ```
 
 
+```{r}
+attendance <- read_csv("jour479x_fall_2022/attendance.csv")
+```
 
 
 
