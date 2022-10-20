@@ -1,0 +1,111 @@
+---
+title: "cfb.rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+
+library(ggalt)
+```
+
+
+```{r}
+logs <- read_csv("data/footballlogs21.csv")
+```
+
+```{r}
+turnovers <- logs %>%
+  group_by(Team, Conference) %>% 
+  summarise(
+    Giveaways = sum(TotalTurnovers), 
+    Takeaways = sum(DefTotalTurnovers)) %>%
+  filter(Conference == "Big Ten Conference")
+```
+
+```{r}
+ggplot() + 
+  geom_dumbbell(
+    data=turnovers, 
+    aes(y=Team, x=Takeaways, xend=Giveaways)
+  )
+```
+
+```{r}
+ggplot() + 
+  geom_dumbbell(
+    data=turnovers, 
+    aes(y=Team, x=Takeaways, xend=Giveaways),
+    colour = "grey",
+    colour_x = "green",
+    colour_xend = "red")
+```
+
+```{r}
+ggplot() + 
+  geom_dumbbell(
+    data=turnovers, 
+    aes(y=Team, x=Takeaways, xend=Giveaways),
+    size = 1,
+    color = "grey",
+    colour_x = "green",
+    colour_xend = "red") + 
+  theme_minimal()
+```
+
+```{r}
+ggplot() + 
+  geom_dumbbell(
+    data=turnovers, 
+    aes(y=reorder(Team, Takeaways), x=Takeaways, xend=Giveaways),
+    size = 1,
+    color = "grey",
+    colour_x = "green",
+    colour_xend = "red") + 
+  theme_minimal()
+```
+
+```{r}
+ggplot() + 
+  geom_lollipop(
+    data=turnovers, 
+    aes(y=Team, x=Takeaways), 
+    horizontal = TRUE
+    )
+```
+
+```{r}
+ggplot() + 
+  geom_lollipop(
+    data=turnovers, 
+    aes(y=reorder(Team, Takeaways), x=Takeaways), 
+    horizontal = TRUE
+    ) + theme_minimal() + 
+  labs(title = "Nebraska's defense improved, but needs more takeaways", y="Team")
+```
+```{r}
+nu <- turnovers %>% filter(Team == "Nebraska")
+```
+
+```{r}
+ggplot() + 
+  geom_lollipop(
+    data=turnovers, 
+    aes(y=reorder(Team, Takeaways), x=Takeaways), 
+    horizontal = TRUE
+    ) + 
+  geom_lollipop(
+    data=nu,
+    aes(y=Team, x=Takeaways),
+    horizontal = TRUE,
+    color = "red"
+  ) + 
+  theme_minimal() + 
+  labs(title = "Nebraska's defense wasn't as bad as you think", y="Team")
+```
+
+
