@@ -109,3 +109,88 @@ ggplot() +
 ```
 
 
+#Regression analysis
+
+```{r}
+logs<- read_csv("http://mattwaite.github.io/sportsdatafiles/footballlogs1121.csv")
+```
+
+```{r}
+logs <- logs %>% 
+  mutate(ScoreDiff = TeamScore - OpponentScore,
+         PenaltyDiff = Penalties - DefPenalties)
+
+logs %>% summarise(correlation = cor(ScoreDiff, PenaltyDiff, method="pearson"))
+```
+
+##They are not very related as the value suggests they are 1% negatively related, an extremely slim margin. When using PenaltyDiff instead of just Penalties, we get a 0.025 correlation. Slightlty more correlation, but still not a lot. 
+
+```{r}
+fit <- lm(ScoreDiff ~ Penalties, data = logs)
+summary(fit)
+```
+```{r}
+fit <- lm(ScoreDiff ~ PenaltyDiff, data = logs)
+summary(fit)
+```
+
+# This data shows us that the p-value is only 0.01856 and the adjusted r squared value is 0.0002627. That means the data is very statistically relevant. A p-value of under 0.05 usually shows increased signifigance. The regression is useful , but a 0.9 r squared value would be very good, this model does not even show a 0.01 r squared value. When using PenaltyDiff, the difference in the penalties the p-value is even more significant. The P value is 0.0008 which is even closer than before. 
+
+```{r}
+logs <- logs %>% mutate(
+  NetPenaltyYards = PenaltyYds - DefPenaltyYds,
+  TurnoverMargin = TotalTurnovers - DefTotalTurnovers)
+```
+
+
+```{r}
+model1 <- lm(ScoreDiff ~ PenaltyDiff + NetPenaltyYards + TurnoverMargin, data=logs)
+summary(model1)
+```
+
+#The mutliple regression model gets us a slightlty different result. The r squared value is 0.2432 which is much larger than the original model. However, the p-value is < 2.2e-16 which means it is very statistically significant. It is way less than before and almost zero. The 0.24 means this model explains more of the variation in response variable than the singular regression model. The residual standard error also went from 22.76 to 19.81, meaning we reduced the amount of error in our model by addding variables. 
+
+
+```{r}
+#checking for multicollinearity
+library(Hmisc)
+
+
+simplelogs <- logs %>% select_if(is.numeric) %>% select(-Game) %>% select(ScoreDiff, PenaltyDiff, NetPenaltyYards, TurnoverMargin)
+
+```
+
+```{r}
+cormatrix <- rcorr(as.matrix(simplelogs))
+
+cormatrix$r
+```
+
+#The multicollinearity matrix shows that the PenaltyDiff is higher correlated with NetPenaltyYards and TurnoverMargin than it is the ScoreDfifferential. however, we do see a good correlation between TurnoverMargin and ScoreDiff, meaning that the model does have some standing. Sadly, PenaltyDIff and NetPenaltyYds can probably not appear in the same model due to such high correlation. 
+
+```{r}
+Closelogs <-logs %>% 
+  filter(ScoreDiff<4)
+```
+
+
+```{r}
+fit <- lm(ScoreDiff ~ PenaltyDiff, data = Closelogs)
+summary(fit)
+```
+
+#The single regression shows a p value of 0.03418, which is larger than the single residual with all games. The r squared value shows  0.0003673.
+
+
+
+```{r}
+model1 <- lm(ScoreDiff ~ PenaltyDiff + NetPenaltyYards + TurnoverMargin, data=Closelogs)
+summary(model1)
+```
+
+#For the multiple regression model, the p value remains the same, but the fr squared value shifted from 0.2432 to 0.08875. That means the data may noit be as good, as a better r squared value shows higher corrrelation. 
+
+
+
+#I learned that there is a pretty good correlation between Penalties and point differential. The less penalties you have/ the smaller the larger the smaller the difference between your opposition tends to lead to a positive point differential. Penalties = losses. This could definitely be used as a story, but a better model should be constructed. There is definitely something to say about the amount of penalties a team has and their margin of loss/victory. 
+

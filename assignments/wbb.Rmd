@@ -1,0 +1,91 @@
+```{r}
+library(tidyverse)
+library(usdata)
+```
+
+
+```{r}
+rosters23 <- read_csv("https://github.com/dwillis/wbb-rosters/raw/main/rosters_2022-23.csv")
+```
+
+
+# Things to clean
+
+* Drop where Name is NA or a number
+* Standardize positions (Guard vs. G)
+* Standardize State (would need to extract it from the city)
+* Standardize the year column
+* Standardize Height (5'10" or 5-10)
+
+# Columns to add
+
+* State column
+* Country column
+* Height in inches
+
+
+```{r}
+rosters23_cleaned %>% distinct(state) %>% arrange(desc(state))
+```
+
+
+```{r}
+rosters23_cleaned <- rosters23 %>% mutate(hometown_clean = str_to_lower(hometown))
+
+rosters23_cleaned <- rosters23_cleaned %>% separate(col=hometown_clean, c("new_hometown", "state"), sep=",", extra="merge")
+  
+```
+```{r}
+rosters23_cleaned <- rosters23_cleaned %>% 
+  mutate(state = str_trim(state), state = str_replace(state, "\\.","")) %>% 
+  mutate(state = case_when(
+     is.na(abbr2state(state)) ~ state, TRUE ~ abbr2state(state)
+  ))
+          
+```
+
+
+
+```{r}
+rosters23_cleaned %>% group_by(position_clean) %>% summarise(players = n()) %>% arrange(desc(players))
+```
+
+```{r}
+rosters23_cleaned <- rosters23_cleaned %>% 
+  mutate(position_clean = position) %>% 
+  mutate(position_clean = case_when(
+    position_clean == "G" ~ "Guard",
+    position_clean == "F" ~ "Forward",
+    TRUE ~ position_clean
+    
+  ))
+
+
+  
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

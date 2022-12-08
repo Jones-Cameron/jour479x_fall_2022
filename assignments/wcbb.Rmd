@@ -1,0 +1,70 @@
+---
+title: "wcbb"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggbeeswarm)
+library(ggrepel)
+```
+
+```{r}
+set.seed(1234)
+```
+
+
+
+```{r}
+
+players <- read_csv("https://dwillis.github.io/sports-data-files/players21.csv")  
+
+```
+
+```{r}
+activeplayers <- players %>% filter(MP>0) 
+```
+
+```{r}
+activeplayers <- activeplayers %>% mutate(tspct=PTS/(2*(FGA+0.44*FTA)))
+```
+
+```{r}
+summary(activeplayers$FGA)
+```
+
+```{r}
+shooters <- activeplayers %>% filter(FGA > 197)
+```
+
+```{r}
+ggplot() + geom_beeswarm(data=shooters, aes(x=Pos, y=tspct), color="grey")
+```
+
+```{r}
+umd <- activeplayers %>% 
+  filter(Team == "Maryland Terrapins") %>% 
+  filter(FGA>197) %>% 
+  arrange(desc(tspct))
+```
+
+```{r}
+ggplot() + 
+  geom_beeswarm(
+    data=shooters, 
+    groupOnX=TRUE, 
+    aes(x=Pos, y=tspct), color="grey") + 
+  geom_beeswarm(
+    data=umd, 
+    groupOnX=TRUE, 
+    aes(x=Pos, y=tspct), color="red")
+```
+
+
+
+
