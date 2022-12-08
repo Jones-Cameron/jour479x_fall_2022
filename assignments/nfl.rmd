@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+
+library(ggalt)
+
+library(nflfastR)
+```
+
+
+#In the first three games of the season, Washington Commanders star wide receiver Terry McLaurin has been a non-factor before halftime. In three first halves, he has run 58 routes but gotten only six pass targets, three of which were on the mark and only one of which he caught — for nine yards.
+
+```{r}
+play_by_play <- read_rds(
+  "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2022.rds"
+)
+```
+
+```{r}
+commies <- play_by_play %>% 
+filter(posteam == "WAS")
+
+```
+```{r}
+library(stringr)
+```
+
+
+```{r}
+terry <- commies %>% 
+  filter(receiver_player_name == "T.McLaurin")
+  
+```
+
+
+```{r}
+first_three <- terry %>% 
+  filter(away_team == "JAX" | away_team == "PHI" | home_team == "DET") %>% 
+  filter(game_half == "Half1")
+
+```
+
+#He is indeed correct, Terry McLaurin only has 6 first half targets through his first three game, of which only one was completed for 9 yards. 
